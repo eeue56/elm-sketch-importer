@@ -1,0 +1,19 @@
+{
+  "name": "elm-sketch-importer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eeue56/elm-sketch-importer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eeue56/elm-sketch-importer/issues"
+  },
+  "homepage": "https://github.com/eeue56/elm-sketch-importer#readme"
+}
