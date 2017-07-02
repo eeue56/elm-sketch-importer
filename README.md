@@ -10,22 +10,24 @@ Work in progress!
 ### Shapes and rects
 
 | Feature | Supported? |
-------------------------
-| Rectangles | :check: |
-| Layer positions | :check: |
-| Layer sizes | :check |
-| Multiple layers | :check: |
-| Other shapes | :cross: |
+|---------|-------------|
+| Rectangles | :white_check_mark: |
+| Layer positions | :white_check_mark: |
+| Layer sizes | :white_check_mark: |
+| Multiple layers | :white_check_mark: |
+| Fills | :white_check_mark: |
+| Colored fills | :white_check_mark: |
+| Other shapes | :warning: |
 
 
 ###  Text
 
 | Feature | Supported? |
-------------------------
-| Text       | :check: |
-| Horizional/vertical flips | :check: |
-| Position | :check: |
-| Size | :cross: |
-| Color | :cross: |
-| Font | :cross: |
+|---------|------------|
+| Text       | :white_check_mark: |
+| Horizional/vertical flips | :white_check_mark: |
+| Position | :white_check_mark: |
+| Size | :warning: |
+| Color | :warning: |
+| Font | :warning: |
 
