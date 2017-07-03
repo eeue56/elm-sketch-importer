@@ -16,6 +16,8 @@ Work in progress!
 | Layer sizes | :white_check_mark: |
 | Multiple layers | :white_check_mark: |
 | Fills | :white_check_mark: |
+| Border | :warning: |
+| Border color | :warning: |
 | Colored fills | :white_check_mark: |
 | Other shapes | :warning: |
 | Groups | :warning: |
