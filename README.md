@@ -18,6 +18,7 @@ Work in progress!
 | Fills | :white_check_mark: |
 | Colored fills | :white_check_mark: |
 | Other shapes | :warning: |
+| Groups | :warning: |
 
 
 ###  Text
