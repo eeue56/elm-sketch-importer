@@ -33,4 +33,4 @@ Work in progress!
 | Size | :warning: |
 | Color | :warning: |
 | Font | :warning: |
-
+| Full strings | :white_check_mark: |
