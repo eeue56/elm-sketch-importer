@@ -4,6 +4,7 @@ import Json.Decode as Json
 import Json.Encode
 import Html
 import Html.Attributes as HA
+import Base64
 
 
 type alias ShapeGroup =
@@ -53,13 +54,29 @@ type alias Text =
     { name : String
     , isFlippedVertical : Bool
     , isFlippedHorizontal : Bool
+    , attributedString : String
     }
 
 
 type Layer
-    = ShapeGroupLayer LayerProps ShapeGroup
+    = GroupLayer (List Layer)
+    | ShapeGroupLayer LayerProps ShapeGroup
     | TextLayer LayerProps Text
     | Unknown Json.Value
+
+
+decodeBase64 : Json.Decoder String
+decodeBase64 =
+    Json.string
+        |> Json.andThen
+            (\str ->
+                case Base64.decode str of
+                    Err e ->
+                        Json.fail e
+
+                    Ok str ->
+                        Json.succeed str
+            )
 
 
 decodeLayer : Json.Decoder Layer
@@ -74,10 +91,21 @@ decodeLayer =
                     "text" ->
                         decodeTextLayer
 
+                    "group" ->
+                        decodeGroupLayer
+
+                    "artboard" ->
+                        decodeGroupLayer
+
                     _ ->
                         Unknown (Json.Encode.string "")
                             |> Json.succeed
             )
+
+
+decodeGroupLayer : Json.Decoder Layer
+decodeGroupLayer =
+    Json.map GroupLayer (Json.lazy (\_ -> Json.field "layers" <| Json.list decodeLayer))
 
 
 decodeShapeGroupLayer : Json.Decoder Layer
@@ -92,10 +120,11 @@ decodeTextLayer =
 
 decodeText : Json.Decoder Text
 decodeText =
-    Json.map3 Text
+    Json.map4 Text
         (Json.field "name" Json.string)
         (Json.field "isFlippedVertical" Json.bool)
         (Json.field "isFlippedHorizontal" Json.bool)
+        (Json.field "attributedString" <| Json.field "archivedAttributedString" <| Json.field "_archive" decodeBase64)
 
 
 decodeLayerProps : Json.Decoder LayerProps
@@ -145,7 +174,7 @@ decodeStyle =
 
 frameToCss : Frame -> List ( String, String )
 frameToCss frame =
-    [ ( "position", "absolute" )
+    [ ( "position", "relative" )
     , ( "left", toString frame.x ++ "px" )
     , ( "top", toString frame.y ++ "px" )
     , ( "width", toString frame.width ++ "px" )
@@ -243,7 +272,26 @@ textToHtml layerProps text =
         ++ styleToCss layerProps.style
         ++ horizontalFlip text.isFlippedHorizontal
         ++ verticalFlip text.isFlippedVertical
-        |> (\x -> Html.div [ HA.style x ] [ Html.text text.name ])
+        ++ [ ( "z-index", "1" ) ]
+        |> (\x -> Html.div [ HA.style x ] [ Html.text text.attributedString ])
+
+
+debugLayer : Layer -> String
+debugLayer layer =
+    case layer of
+        Unknown stuff ->
+            "Unknown"
+
+        ShapeGroupLayer props group ->
+            ""
+
+        TextLayer props text ->
+            "Text " ++ text.attributedString
+
+        GroupLayer layers ->
+            List.map debugLayer layers
+                |> String.join ", "
+                |> (++) "Layer\n"
 
 
 toHtml : Layer -> Html.Html msg
@@ -257,3 +305,7 @@ toHtml layer =
 
         TextLayer layerProps text ->
             textToHtml layerProps text
+
+        GroupLayer layers ->
+            List.map toHtml layers
+                |> Html.div []
