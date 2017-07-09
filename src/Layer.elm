@@ -58,11 +58,18 @@ type alias Text =
     }
 
 
+type alias ImageProps =
+    { name : String
+    , src : String
+    }
+
+
 type Layer
     = GroupLayer (List Layer)
     | ShapeGroupLayer LayerProps ShapeGroup
     | TextLayer LayerProps Text
     | Unknown Json.Value
+    | BitmapLayer LayerProps ImageProps
 
 
 decodeBase64 : Json.Decoder String
@@ -97,6 +104,9 @@ decodeLayer =
                     "artboard" ->
                         decodeGroupLayer
 
+                    "bitmap" ->
+                        decodeBitmapLayer
+
                     _ ->
                         Unknown (Json.Encode.string "")
                             |> Json.succeed
@@ -118,6 +128,11 @@ decodeTextLayer =
     Json.map2 TextLayer decodeLayerProps decodeText
 
 
+decodeBitmapLayer : Json.Decoder Layer
+decodeBitmapLayer =
+    Json.map2 BitmapLayer decodeLayerProps decodeImageProps
+
+
 decodeText : Json.Decoder Text
 decodeText =
     Json.map4 Text
@@ -125,6 +140,13 @@ decodeText =
         (Json.field "isFlippedVertical" Json.bool)
         (Json.field "isFlippedHorizontal" Json.bool)
         (Json.field "attributedString" <| Json.field "archivedAttributedString" <| Json.field "_archive" decodeBase64)
+
+
+decodeImageProps : Json.Decoder ImageProps
+decodeImageProps =
+    Json.map2 ImageProps
+        (Json.field "name" Json.string)
+        (Json.field "image" <| Json.field "_ref" Json.string)
 
 
 decodeLayerProps : Json.Decoder LayerProps
@@ -174,7 +196,7 @@ decodeStyle =
 
 frameToCss : Frame -> List ( String, String )
 frameToCss frame =
-    [ ( "position", "relative" )
+    [ ( "position", "absolute" )
     , ( "left", toString frame.x ++ "px" )
     , ( "top", toString frame.y ++ "px" )
     , ( "width", toString frame.width ++ "px" )
@@ -276,6 +298,14 @@ textToHtml layerProps text =
         |> (\x -> Html.div [ HA.style x ] [ Html.text text.attributedString ])
 
 
+bitmapToHtml : LayerProps -> ImageProps -> Html.Html msg
+bitmapToHtml layerProps image =
+    frameToCss layerProps.frame
+        ++ styleToCss layerProps.style
+        ++ [ ( "z-index", "1" ) ]
+        |> (\x -> Html.div [ HA.style x ] [ Html.img [ HA.src image.src, HA.alt image.name ] [] ])
+
+
 debugLayer : Layer -> String
 debugLayer layer =
     case layer of
@@ -293,6 +323,9 @@ debugLayer layer =
                 |> String.join ", "
                 |> (++) "Layer\n"
 
+        BitmapLayer layer image ->
+            "Image " ++ image.name
+
 
 toHtml : Layer -> Html.Html msg
 toHtml layer =
@@ -306,6 +339,70 @@ toHtml layer =
         TextLayer layerProps text ->
             textToHtml layerProps text
 
+        BitmapLayer layerProps image ->
+            bitmapToHtml layerProps image
+
         GroupLayer layers ->
             List.map toHtml layers
                 |> Html.div []
+
+
+layerPropsToElmHtml : LayerProps -> String
+layerPropsToElmHtml props =
+    frameToCss props.frame
+        ++ styleToCss props.style
+        |> List.map (\( x, y ) -> "(\"" ++ x ++ "\", \"" ++ y ++ "\")")
+        |> String.join "\n  , "
+        |> (\x -> "Html.div [ Html.Attributes.style [" ++ x ++ "] ] []")
+
+
+textToElmHtml : LayerProps -> Text -> String
+textToElmHtml layerProps text =
+    frameToCss layerProps.frame
+        ++ styleToCss layerProps.style
+        ++ horizontalFlip text.isFlippedHorizontal
+        ++ verticalFlip text.isFlippedVertical
+        ++ [ ( "z-index", "1" ) ]
+        |> List.map (\( x, y ) -> "(\"" ++ x ++ "\", \"" ++ y ++ "\")")
+        |> String.join "\n  , "
+        |> (\x -> "Html.div [ Html.Attributes.style [" ++ x ++ "] ] [ Html.text \"" ++ text.name ++ "\" ]")
+
+
+bitmapToElmHtml : LayerProps -> ImageProps -> String
+bitmapToElmHtml layerProps image =
+    frameToCss layerProps.frame
+        ++ styleToCss layerProps.style
+        ++ [ ( "z-index", "1" ) ]
+        |> List.map (\( x, y ) -> "(\"" ++ x ++ "\", \"" ++ y ++ "\")")
+        |> String.join "\n  , "
+        |> (\x ->
+                "Html.div [ Html.Attributes.style ["
+                    ++ "] ]"
+                    ++ " [ Html.img [ Html.Attributes.src \""
+                    ++ image.src
+                    ++ ".png"
+                    ++ "\", Html.Attributes.style ["
+                    ++ x
+                    ++ "] ] [] ]"
+           )
+
+
+toElmHtml : Layer -> String
+toElmHtml layer =
+    case layer of
+        Unknown stuff ->
+            "Html.text \"Don't know\""
+
+        ShapeGroupLayer layerProps shapeGroup ->
+            layerPropsToElmHtml layerProps
+
+        TextLayer layerProps text ->
+            textToElmHtml layerProps text
+
+        BitmapLayer layerProps image ->
+            bitmapToElmHtml layerProps image
+
+        GroupLayer layers ->
+            List.map toElmHtml layers
+                |> String.join "\n  , "
+                |> (\str -> "Html.div [] [" ++ str ++ "]")
