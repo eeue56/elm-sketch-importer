@@ -33,8 +33,6 @@ function main () {
         pageCount++;
 
         fs.writeFile("generated/Page" + pageCount + ".elm", data, function(){
-            console.log('exiting');
-            process.exit()
         });
     })
 
@@ -49,6 +47,11 @@ function main () {
 
 
     decompress(options.files[0]).then(function(files){
+        var imageFiles = files
+        .filter(function(file) { return file.path.indexOf("images") === 0 })
+        .map(function(file) { return file.path });
+
+        elmApp.ports.knownImages.send(imageFiles);
 
         files
         .filter(function(file) { return file.path.indexOf("pages") === 0})

@@ -368,8 +368,37 @@ textToElmHtml layerProps text =
         |> (\x -> "Html.div [ Html.Attributes.style [" ++ x ++ "] ] [ Html.text \"" ++ text.name ++ "\" ]")
 
 
-bitmapToElmHtml : LayerProps -> ImageProps -> String
-bitmapToElmHtml layerProps image =
+{-|
+    identifySuffix ["hello.png"] "hello"
+    --> "hello.png"
+
+    identifySuffix [ "a.png", "ab.jpg"] "ab"
+    --> "ab.jpg"
+
+    identifySuffix [] "a"
+    --> "a"
+-}
+identifySuffix : List String -> String -> String
+identifySuffix knownImages imagePrefix =
+    knownImages
+        |> List.filterMap
+            (\x ->
+                case String.split "." x of
+                    [] ->
+                        Nothing
+
+                    y :: ys ->
+                        if y == imagePrefix then
+                            Just x
+                        else
+                            Nothing
+            )
+        |> List.head
+        |> Maybe.withDefault imagePrefix
+
+
+bitmapToElmHtml : List String -> LayerProps -> ImageProps -> String
+bitmapToElmHtml knownImages layerProps image =
     frameToCss layerProps.frame
         ++ styleToCss layerProps.style
         ++ [ ( "z-index", "1" ) ]
@@ -379,16 +408,15 @@ bitmapToElmHtml layerProps image =
                 "Html.div [ Html.Attributes.style ["
                     ++ "] ]"
                     ++ " [ Html.img [ Html.Attributes.src \""
-                    ++ image.src
-                    ++ ".png"
+                    ++ identifySuffix knownImages image.src
                     ++ "\", Html.Attributes.style ["
                     ++ x
                     ++ "] ] [] ]"
            )
 
 
-toElmHtml : Layer -> String
-toElmHtml layer =
+toElmHtml : List String -> Layer -> String
+toElmHtml knownImages layer =
     case layer of
         Unknown stuff ->
             "Html.text \"Don't know\""
@@ -400,9 +428,9 @@ toElmHtml layer =
             textToElmHtml layerProps text
 
         BitmapLayer layerProps image ->
-            bitmapToElmHtml layerProps image
+            bitmapToElmHtml knownImages layerProps image
 
         GroupLayer layers ->
-            List.map toElmHtml layers
+            List.map (toElmHtml knownImages) layers
                 |> String.join "\n  , "
                 |> (\str -> "Html.div [] [" ++ str ++ "]")
