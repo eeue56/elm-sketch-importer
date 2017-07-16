@@ -2,6 +2,7 @@ module Render.File exposing (toElmHtml)
 
 import Layer exposing (..)
 import Assets exposing (..)
+import Render.Css exposing (..)
 
 
 layerPropsToElmHtml : LayerProps -> String
@@ -47,7 +48,10 @@ toElmHtml : List String -> Layer -> String
 toElmHtml knownImages layer =
     case layer of
         Unknown stuff ->
-            "Html.text \"Don't know\""
+            "Html.text \"\" -- I was unable to figure out what this layer was" ++ toString stuff
+
+        Slice ->
+            "Html.text \"\" -- Unsupported slice!"
 
         ShapeGroupLayer layerProps shapeGroup ->
             layerPropsToElmHtml layerProps

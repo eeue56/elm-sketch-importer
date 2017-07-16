@@ -29,6 +29,19 @@ decodeLayers =
     Json.field "layers" (Json.list Layer.decodeLayer)
 
 
+wrapContent : List String -> String
+wrapContent divs =
+    """import Html
+import Html.Attributes
+
+main : Html.Html msg
+main =
+    Html.div
+        []
+        [
+""" ++ String.join "\n\n  ," divs ++ "]"
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -41,7 +54,7 @@ update msg model =
 
                 Ok v ->
                     List.map (toElmHtml model.knownImages) v
-                        |> (\divs -> "import Html\nimport Html.Attributes\n\n\nmain = Html.div [] [" ++ String.join "\n\n  ," divs ++ "]")
+                        |> wrapContent
                         |> respond
                         |> (\x -> ( model, x ))
 

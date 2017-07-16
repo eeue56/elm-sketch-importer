@@ -3,6 +3,7 @@ module Render.Runtime exposing (toHtml)
 import Html
 import Html.Attributes as HA
 import Layer exposing (..)
+import Render.Css exposing (..)
 
 
 layerPropsToHtml : LayerProps -> Html.Html msg
@@ -37,7 +38,10 @@ toHtml : Layer -> Html.Html msg
 toHtml layer =
     case layer of
         Unknown stuff ->
-            Html.text "Don't know"
+            Html.text "Don't know. Please open an issue on Github!"
+
+        Slice ->
+            Html.text "Unsupported slice. Please open an issue on Github!"
 
         ShapeGroupLayer layerProps shapeGroup ->
             layerPropsToHtml layerProps
