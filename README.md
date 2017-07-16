@@ -4,8 +4,17 @@ Takes a Sketch file, and generates Elm out of it. This is particularly useful if
 
 This is a work in progress. PRs are welcome!
 
+![](./sketch_github.gif)
 
 ## Installation 
+
+We use elm-format in order to format the output correctly. It is recommeneded that you have this installed globally, via
+
+```
+npm install -g elm-format
+```
+
+Installing the elm-sketch-importer itself is pretty easy.
 
 ```
 npm install -g elm-sketch-importer
