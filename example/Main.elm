@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html
 import Json.Decode as Json
 import Layer
+import Render.Runtime
 import SketchExample
 
 
@@ -18,6 +19,5 @@ main =
             Html.text r
 
         Ok v ->
-            List.map Layer.toElmHtml v
-                |> (\divs -> "Html.div [] [" ++ String.join "\n," divs ++ "]")
-                |> Html.text
+            List.map Render.Runtime.toHtml v
+                |> Html.div []
