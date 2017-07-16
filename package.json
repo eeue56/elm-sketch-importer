@@ -1,6 +1,6 @@
 {
   "name": "elm-sketch-importer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An Elm importer from Sketch",
   "main": "index.js",
   "bin": {
