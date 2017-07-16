@@ -6,6 +6,11 @@ This is a work in progress. PRs are welcome!
 
 ![](./sketch_github.gif)
 
+
+This readme is also available in:
+
+[Welsh](https://github.com/eeue56/elm-sketch-importer/blob/master/README_we.md)
+
 ## Installation 
 
 We use elm-format in order to format the output correctly. It is recommeneded that you have this installed globally, via
