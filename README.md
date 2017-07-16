@@ -79,9 +79,17 @@ Right now, long text is not correctly exported. This is down to the fact that BP
 
 This roadmap intends to be a rough priority list. No dates nor time are fixed -- but the more PRs to help, the faster things get done :)
 
+# Before 1.0
+
 - Relative layout instead of fixed pixels
 - Full support for importing Sketch files
 	- Make sure that no features remain unsupported
+
+# After 1.0
+
 - Export views to Sketch
+
+# Misc
+
 - Generating elm-css or style-element based views
 
