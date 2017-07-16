@@ -18,9 +18,7 @@
   "homepage": "https://github.com/eeue56/elm-sketch-importer#readme",
   "dependencies": {
     "decompress": "^4.2.0",
-    "elm-format": "^0.6.1-alpha",
     "progress": "^2.0.0",
-    "unzip": "^0.1.11",
     "yargs": "^8.0.2"
   }
 }
