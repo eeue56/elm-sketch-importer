@@ -3,6 +3,7 @@ port module Runner exposing (main)
 import Platform
 import Json.Decode as Json
 import Layer exposing (decodeLayer)
+import Render.File exposing (toElmHtml)
 
 
 port parse : (String -> msg) -> Sub msg
@@ -39,7 +40,7 @@ update msg model =
                         |> (\x -> ( model, x ))
 
                 Ok v ->
-                    List.map (Layer.toElmHtml model.knownImages) v
+                    List.map (toElmHtml model.knownImages) v
                         |> (\divs -> "import Html\nimport Html.Attributes\n\n\nmain = Html.div [] [" ++ String.join "\n\n  ," divs ++ "]")
                         |> respond
                         |> (\x -> ( model, x ))

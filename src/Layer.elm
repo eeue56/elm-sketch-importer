@@ -2,8 +2,6 @@ module Layer exposing (..)
 
 import Json.Decode as Json
 import Json.Encode
-import Html
-import Html.Attributes as HA
 import Base64
 
 
@@ -235,13 +233,6 @@ styleToCss style =
             []
 
 
-layerPropsToHtml : LayerProps -> Html.Html msg
-layerPropsToHtml props =
-    frameToCss props.frame
-        ++ styleToCss props.style
-        |> (\x -> Html.div [ HA.style x ] [])
-
-
 verticalFlip : Bool -> List ( String, String )
 verticalFlip flipped =
     if flipped then
@@ -288,24 +279,8 @@ horizontalFlip flipped =
         []
 
 
-textToHtml : LayerProps -> Text -> Html.Html msg
-textToHtml layerProps text =
-    frameToCss layerProps.frame
-        ++ styleToCss layerProps.style
-        ++ horizontalFlip text.isFlippedHorizontal
-        ++ verticalFlip text.isFlippedVertical
-        ++ [ ( "z-index", "1" ) ]
-        |> (\x -> Html.div [ HA.style x ] [ Html.text text.attributedString ])
-
-
-bitmapToHtml : LayerProps -> ImageProps -> Html.Html msg
-bitmapToHtml layerProps image =
-    frameToCss layerProps.frame
-        ++ styleToCss layerProps.style
-        ++ [ ( "z-index", "1" ) ]
-        |> (\x -> Html.div [ HA.style x ] [ Html.img [ HA.src image.src, HA.alt image.name ] [] ])
-
-
+{-| Turns the given layer into some useful debug info in the form of text
+-}
 debugLayer : Layer -> String
 debugLayer layer =
     case layer of
@@ -325,112 +300,3 @@ debugLayer layer =
 
         BitmapLayer layer image ->
             "Image " ++ image.name
-
-
-toHtml : Layer -> Html.Html msg
-toHtml layer =
-    case layer of
-        Unknown stuff ->
-            Html.text "Don't know"
-
-        ShapeGroupLayer layerProps shapeGroup ->
-            layerPropsToHtml layerProps
-
-        TextLayer layerProps text ->
-            textToHtml layerProps text
-
-        BitmapLayer layerProps image ->
-            bitmapToHtml layerProps image
-
-        GroupLayer layers ->
-            List.map toHtml layers
-                |> Html.div []
-
-
-layerPropsToElmHtml : LayerProps -> String
-layerPropsToElmHtml props =
-    frameToCss props.frame
-        ++ styleToCss props.style
-        |> List.map (\( x, y ) -> "(\"" ++ x ++ "\", \"" ++ y ++ "\")")
-        |> String.join "\n  , "
-        |> (\x -> "Html.div [ Html.Attributes.style [" ++ x ++ "] ] []")
-
-
-textToElmHtml : LayerProps -> Text -> String
-textToElmHtml layerProps text =
-    frameToCss layerProps.frame
-        ++ styleToCss layerProps.style
-        ++ horizontalFlip text.isFlippedHorizontal
-        ++ verticalFlip text.isFlippedVertical
-        ++ [ ( "z-index", "1" ) ]
-        |> List.map (\( x, y ) -> "(\"" ++ x ++ "\", \"" ++ y ++ "\")")
-        |> String.join "\n  , "
-        |> (\x -> "Html.div [ Html.Attributes.style [" ++ x ++ "] ] [ Html.text \"" ++ text.name ++ "\" ]")
-
-
-{-|
-    identifySuffix ["hello.png"] "hello"
-    --> "hello.png"
-
-    identifySuffix [ "a.png", "ab.jpg"] "ab"
-    --> "ab.jpg"
-
-    identifySuffix [] "a"
-    --> "a"
--}
-identifySuffix : List String -> String -> String
-identifySuffix knownImages imagePrefix =
-    knownImages
-        |> List.filterMap
-            (\x ->
-                case String.split "." x of
-                    [] ->
-                        Nothing
-
-                    y :: ys ->
-                        if y == imagePrefix then
-                            Just x
-                        else
-                            Nothing
-            )
-        |> List.head
-        |> Maybe.withDefault imagePrefix
-
-
-bitmapToElmHtml : List String -> LayerProps -> ImageProps -> String
-bitmapToElmHtml knownImages layerProps image =
-    frameToCss layerProps.frame
-        ++ styleToCss layerProps.style
-        ++ [ ( "z-index", "1" ) ]
-        |> List.map (\( x, y ) -> "(\"" ++ x ++ "\", \"" ++ y ++ "\")")
-        |> String.join "\n  , "
-        |> (\x ->
-                "Html.div [ Html.Attributes.style ["
-                    ++ "] ]"
-                    ++ " [ Html.img [ Html.Attributes.src \""
-                    ++ identifySuffix knownImages image.src
-                    ++ "\", Html.Attributes.style ["
-                    ++ x
-                    ++ "] ] [] ]"
-           )
-
-
-toElmHtml : List String -> Layer -> String
-toElmHtml knownImages layer =
-    case layer of
-        Unknown stuff ->
-            "Html.text \"Don't know\""
-
-        ShapeGroupLayer layerProps shapeGroup ->
-            layerPropsToElmHtml layerProps
-
-        TextLayer layerProps text ->
-            textToElmHtml layerProps text
-
-        BitmapLayer layerProps image ->
-            bitmapToElmHtml knownImages layerProps image
-
-        GroupLayer layers ->
-            List.map (toElmHtml knownImages) layers
-                |> String.join "\n  , "
-                |> (\str -> "Html.div [] [" ++ str ++ "]")
