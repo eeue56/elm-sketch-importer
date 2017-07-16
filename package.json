@@ -1,16 +1,29 @@
 {
   "name": "elm-sketch-importer",
   "version": "0.0.1",
-  "description": "",
+  "description": "An Elm importer from Sketch",
   "main": "index.js",
+  "bin": {
+    "elm-sketch-importer": "index.js"
+  },
+  "files": "elm.js",
   "scripts": {
+    "build": "./build.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eeue56/elm-sketch-importer.git"
   },
-  "author": "",
+  "keywords": [
+    "elm",
+    "sketch",
+    "importer",
+    "exporter",
+    "static",
+    "design"
+  ],
+  "author": "Noah Hall (eeue56)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/eeue56/elm-sketch-importer/issues"
