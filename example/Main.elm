@@ -18,5 +18,6 @@ main =
             Html.text r
 
         Ok v ->
-            List.map Layer.toHtml v
-                |> Html.div []
+            List.map Layer.toElmHtml v
+                |> (\divs -> "Html.div [] [" ++ String.join "\n," divs ++ "]")
+                |> Html.text

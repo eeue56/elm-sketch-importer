@@ -5,6 +5,11 @@ var decompress = require('decompress');
 var Elm = require('./elm.js');
 
 
+if (argv._.length === 0){
+    console.log('Please provide a file to convert to Elm!');
+    process.exit(1);
+}
+
 var options = {
     output: "Main.elm",
     files: argv._
